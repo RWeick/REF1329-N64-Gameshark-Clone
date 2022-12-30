@@ -7,6 +7,10 @@ I will be adding a BOM shortly, though everything is labeled properly in the sch
 
 This is my first foray into Verilog, and I welcome any comments or suggestions about how I could have done it better.
 
+Huge shoutout to @Parasyte for his ceaseless guidance, mentorship, and encouragement, as well as for originally documenting the hardware registers of the N64 Gameshark. This would not exist without him.
+
+Huge shoutout to the #N64Brew community, who have provided countless resources and documentation that enabled me to complete this project.
+
 PCB Thickness: 1.2 mm
 
 ![image](https://github.com/Modman/REF1329-N64-Gameshark-Clone/blob/main/Front.png)
