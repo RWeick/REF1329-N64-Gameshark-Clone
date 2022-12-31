@@ -79,7 +79,7 @@ begin
 	r_button [19:0] <= {r_button [18:0], button};
 	r_rdr <= remote_data_ready;
 	r_rdr2 <= r_rdr;
-	r_read_top <= read_cur;
+	r_read_top <= read;
 	r_sst_ce <= 1;
 	r_sst_oe <= 1;
 	rd_cnt_nxt <= rd_cnt;
