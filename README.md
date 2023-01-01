@@ -3,8 +3,6 @@ This implements the original LZ9FC17 GAL on an Altera EPM240. It fully supports 
 
 The upper EEPROM contains the high bytes of the BIN, and the lower EEPROM contains the lower bytes of the BIN. Happy making.
 
-I will be adding a BOM shortly, though everything is labeled properly in the schematic.
-
 This is my first foray into Verilog, and I welcome any comments or suggestions about how I could have done it better.
 
 Huge shoutout to @Parasyte for his ceaseless guidance, mentorship, and encouragement, as well as for originally documenting the hardware registers of the N64 Gameshark. This would not exist without him.
