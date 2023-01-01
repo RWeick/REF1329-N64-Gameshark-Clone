@@ -1,0 +1,33 @@
+1x 50 MHz XTAL Oscillator ECS-2033-500-BN
+
+2x SST 29LE010 or 28LF040, PLCC32
+
+1x Altera EPM240T100C5N
+
+2x 100 nF capacitors, SMD, 1206 package size
+
+3x 10k Ohm resistors, SMD, 1206 package size
+
+8x 100 nF capacitors, SMD, 0603 package size
+
+4x 10k Ohm resistors, SMD, 0603 package size
+
+8x 220 Ohm resistors, SMD, 0805 package size
+
+1x HDSP-7401, HDSP-7501, or HDSP-7801
+
+1x DB25, Parallel Port, Male with through-hole pins
+
+1x 6x6x13mm tactile push button
+
+1x HC374A, SOIC-20
+
+1x SN74HC04, SOIC-14
+
+1x SN74HC164, SOIC-14
+
+1x N64 Cartridge slot, 2.5mm or 2.54mm
+https://www.aliexpress.us/item/3256803845846403.html?gatewayAdapt=glo2usa4itemAdapt&_randl_shipto=US
+
+1x (2x5 10 pin male connector socket)
+https://www.aliexpress.us/item/3256801213832274.html?gatewayAdapt=glo2usa4itemAdapt&_randl_shipto=US
