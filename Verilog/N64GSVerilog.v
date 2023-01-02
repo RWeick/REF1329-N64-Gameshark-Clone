@@ -29,8 +29,8 @@ reg ad_out_en = 0;
 reg [12:0] address_inc = 13'b0;
 reg [12:0] address_inc_next = 13'b0;
 reg ale_out_en = 0;
-reg alel_cur;
-reg aleh_cur;
+reg [5:0] alel_stat;
+reg [5:0] aleh_stat;
 reg cnt_reset = 0;
 reg first_boot = 1;
 reg [31:0] n64_ad_store = 32'b0;
@@ -50,13 +50,12 @@ reg r_sst_ce = 1;
 reg r_sst_oe = 1;
 reg [5:0] rd_cnt = 0;
 reg [5:0] rd_cnt_nxt = 0;
-reg read_cur;
-reg read_prev;
+reg [5:0] read_stat;
 reg seven_seg_enable = 0;
 reg [5:0] wr_cnt = 0;
 reg [5:0] wr_cnt_nxt = 0;
-reg write_cur;
-reg write_prev;
+reg [5:0] write_stat;
+
 
 assign ad = (ale_out_en && ad_out_en) ? r_ad : 16'hZ;
 assign cp = r_cp;
@@ -72,8 +71,8 @@ always @(posedge clk)
 begin
 	ad_out_en <= 0;
 	address_inc_next <= address_inc;
-	aleh_cur <= aleh;
-	alel_cur <= alel;
+	aleh_stat [5:0] <= {aleh_stat [4:0], aleh};
+	alel_stat [5:0] <= {alel_stat [4:0], alel};
 	cnt_reset <= 0;
 	press <= 0;
 	r_button [19:0] <= {r_button [18:0], button};
@@ -83,99 +82,72 @@ begin
 	r_sst_ce <= 1;
 	r_sst_oe <= 1;
 	rd_cnt_nxt <= rd_cnt;
-	read_cur <= read;
-	read_prev <= read_cur;
+	read_stat [5:0] <= {read_stat [4:0], read};
 	wr_cnt_nxt <= wr_cnt;
-	write_cur <= write;
-	write_prev <= write_cur;
+	write_stat [5:0] <= {write_stat [4:0], write};
 
 	if (r_button [19:0] == 20'h0)	//Button debouncing
 		begin
 		press <= 1;
 		end
-
-	if (write_prev && !write_cur)	//Grabbing the data at the falling edge of write for internal register purposes
+		
+	if (write_stat [1] == 1'b0 && write_stat [0] == 1'b1)
 		begin
-		n64_data_store [15:0] <= ad;
+		address_inc <= (address_inc_next + 1'b1);
 		end
 
-	if (!read_prev && read_cur)		//Disable the CPLD driving the PI bus and increment the SST address at the rising edge of read
+	if (write_stat [1] == 1'b1 && write_stat [0] == 1'b0)	//Grabbing the data at the falling edge of write for internal register purposes
+		begin
+		n64_data_store [15:0] <= ad;
+		sst_address [18:0] <= (n64_ad_store [19:1] + address_inc);
+		end
+
+	if (read_stat [1] == 1'b0 && read_stat [0] == 1'b1)		//Disable the CPLD driving the PI bus and increment the SST address at the rising edge of read
 		begin
 		address_inc <= (address_inc_next + 1'b1);
 		ale_out_en <= 0;
 		end
 
-	if (read_prev && !read_cur)		//Set the SST address to the EEPROMs and enable the CPLD driving the PI bus if enabled elsewhere at the falling edge of read
+	if (read_stat [1] == 1'b1 && read_stat [0] == 1'b0)		//Set the SST address to the EEPROMs and enable the CPLD driving the PI bus if enabled elsewhere at the falling edge of read
 		begin
 		sst_address [18:0] <= (n64_ad_store [19:1] + address_inc);
 		ale_out_en <= 1;
 		end
 
-	if (alel && !aleh)		//Due to the short window to work with the ALE L signal, this is the way I found to reliably grab the lower half of the address from the PI bus
+	if (alel == 1'b1	&& aleh == 1'b0)		//Due to the short window to work with the ALE L signal, this is the way I found to reliably grab the lower half of the address from the PI bus
 		begin
 		n64_ad_store [15:0] <= ad;
 		address_inc <= 13'b0;
 		end
 
-	if (aleh && alel)		//This reliably grabs the upper half of the address from the PI bus
+	if (aleh == 1'b1 && alel == 1'b1)		//This reliably grabs the upper half of the address from the PI bus
 		begin
 		n64_ad_store [31:16] <= ad;
-		end
-
-	if (aleh_cur || alel_cur)	//Enables resetting of the counter for pulsing the Chip Enable line during certain EEPROM reads and writes. Real hardware outputs the N64 Read signal for most of the CE and OE functions, however there are certain functions that require one CE pulse instead of the two that normally occur on the read line. Resetting the counter at an address change ensures that only one pulse is issued.
-		begin
 		cnt_reset <= 1;
 		end
 
-//	if ((n64_ad_store [31:20] == 12'h100) && r_cold_reset)	//My non-functioning attempt to implement address mapping that would allow this cart to work with the Sanni Cart Reader for programming. This will be implemented later, but isn't required for the device to operate properly.
+//	if ((n64_ad_store [31:20] == 12'h100) || (n64_ad_store [31:20] == 12'h10C))	//Mapping that allows this cart to work with the Sanni Cart Reader for programming. 
 //		begin
 //		r_sst [18:0] <= sst_address [18:0];
 //		r_read_top <= 1;
-//		r_sst_oe <= read_cur;
-//
-//		if (!write_cur)
-//			begin
-//			r_sst_ce <= 0;
-//			end
-//
-//		if (!read_cur)
-//			begin
-//			r_sst_ce <= 0;
-//			end
+//		r_sst_oe <= (read_stat [5:3] == 3'b000) ? 1'b0 : 1'b1;
+//		r_sst_ce <= ((write_stat [5:4] == 2'b00) || (read_stat [5:3] == 3'b000)) ? 1'b0 : 1'b1;
 //		end
 
-	if ((n64_ad_store >= 32'h10000000) && (n64_ad_store <= 32'h10000020) && first_boot)		//Mirroring actual hardware mapping for initial boot purposes to get the Gameshark ROM into the system
+	if ((n64_ad_store >= 32'h10000000) && (n64_ad_store <= 32'h1000003F) && first_boot)		//Mirroring actual hardware mapping for initial boot purposes to get the Gameshark ROM into the system
 		begin
 		r_sst [18:0] <= sst_address [18:0];
 		r_read_top <= 1;
-		r_sst_oe <= read_cur;
-
-		if (!write)
-			begin
-			r_sst_ce <= 0;
-			end
-
-		if (!read)
-			begin
-			r_sst_ce <= 0;
-			end
+		r_sst_oe <= read_stat [0];
+		r_sst_ce <= (!write || !read) ? 1'b0 : 1'b1;
 		end
 
 	if ((n64_ad_store >= 32'h10001000) && (n64_ad_store <= 32'h1001FFFF) && first_boot)		//Mirroring actual hardware mapping for initial boot purposes to get the Gameshark ROM into the system
 		begin
 		r_sst [18:0] <= sst_address [18:0];
 		r_read_top <= 1;
-		r_sst_oe <= read_cur;
-
-		if (!write)
-			begin
-			r_sst_ce <= 0;
-			end
-
-		if (!read)
-			begin
-			r_sst_ce <= 0;
-			end
+		r_sst_oe <= read_stat [0];
+		r_sst_ce <= (!write || !read) ? 1'b0 : 1'b1;
 		end
 
 	if ((n64_ad_store >= 32'h10020000) && (n64_ad_store <= 32'h10100FFF) && first_boot)		//Mirroring actual hardware mapping for initial boot purposes to get the Gameshark ROM into the system
@@ -189,12 +161,15 @@ begin
 		begin
 		r_sst [18:0] <= sst_address [18:0];
 		r_read_top <= 1;
-		r_sst_oe <= read_cur;
-
-		if (!read)
-			begin
-			r_sst_ce <= 0;
-			end
+//		r_sst_oe <= (read_stat [5:3] == 3'b000) ? 1'b0 : 1'b1;
+//		r_sst_ce <= ((write_stat [5:3] == 3'b000) || (read_stat [5:3] == 3'b000)) ? 1'b0 : 1'b1;
+		r_sst_oe <= (read == 1'b0) ? 1'b0 : 1'b1;
+		r_sst_ce <= (!write || !read) ? 1'b0 : 1'b1;
+		end
+		
+	if ((n64_ad_store == 32'h10400400) && (n64_data_store == 16'h001E))		//This register was a good candidate to disable "first boot" address mapping, enabling game boot after the firmware is loaded. It may actually exist for some other reason, but it causes no issues to be implemented like this.
+		begin
+		first_boot <= 0;
 		end
 
 	if ((n64_ad_store == 32'h10400600) && (n64_data_store [9]) && first_boot)		//7 Segment Display Register
@@ -224,11 +199,6 @@ begin
 		r_read_top <= 1;
 		end
 
-	if ((n64_ad_store == 32'h10400400) && (n64_data_store == 16'h001E))		//This register was a good candidate to disable "first boot" address mapping, enabling game boot after the firmware is loaded. It may actually exist for some other reason, but it causes no issues to be implemented like this.
-		begin
-		first_boot <= 0;
-		end
-
 	if ((n64_ad_store == 32'h1E400600) && (n64_data_store [9]))			//7 Segment display register post-boot address mapping
 		begin
 		seven_seg_enable <= n64_data_store [10];
@@ -242,39 +212,30 @@ begin
 
 	if (n64_ad_store == 32'h1E5FFFFC)		//Parallel Port and PIC security device output register. This pulses the Clock Pulse line 
 		begin
-		r_pport_cp <= write_cur;
+		r_pport_cp <= write_stat [0];
 		end
 
 	if (n64_ad_store [31:20] == 12'h1EC)		//The EEPROM is mapped here
 		begin
 		r_sst [18:0] <= sst_address [18:0];
-		r_sst_oe <= read_cur;
+		r_sst_oe <= read_stat [0];
 		r_read_top <= 1;
-
-		if (!read_cur)
-			begin
-			r_sst_ce <= 0;
-			end
-
-		if (!write_cur)
-			begin
-			r_sst_ce <= 0;
-			end
+		r_sst_ce <= (!write_stat [0] || !read_stat [0]) ? 1'b0 : 1'b1;
 		end
 
 	if (n64_ad_store [31:20] == 12'h1EE)			//The EEPROM is mapped here, only even addresses
 		begin
 		r_read_top <= 1;
 		r_sst [18:0] <= (n64_ad_store [19:1]);
-		r_sst_oe <= read_cur;
+		r_sst_oe <= read_stat [0];
 
-		if (!write_cur && (wr_cnt <= 4'd7) && !cnt_reset)
+		if (!write_stat[0] && (wr_cnt <= 4'd7) && !cnt_reset)
 			begin
 			wr_cnt <= (wr_cnt_nxt + 1'b1);
 			r_sst_ce <= 0;
 			end
 
-		if (!read_cur && (rd_cnt <= 4'd7) && !cnt_reset)
+		if (!read_stat[0] && (rd_cnt <= 4'd7) && !cnt_reset)
 			begin
 			rd_cnt <= (rd_cnt_nxt + 1'b1);
 			r_sst_ce <= 0;
@@ -291,15 +252,15 @@ begin
 		begin
 		r_sst [18:0] <= ((n64_ad_store [19:1]) + 1'b1);
 		r_read_top <= 1;
-		r_sst_oe <= read_cur;
+		r_sst_oe <= read_stat [0];
 
-		if (!write_cur && (wr_cnt <= 4'd7) && !cnt_reset)
+		if (!write_stat[0] && (wr_cnt <= 4'd7) && !cnt_reset)
 			begin
 			wr_cnt <= (wr_cnt_nxt + 1'b1);
 			r_sst_ce <= 0;
 			end
 
-		if (!read_cur && (rd_cnt <= 4'd7) && !cnt_reset)
+		if (!read_stat[0] && (rd_cnt <= 4'd7) && !cnt_reset)
 			begin
 			rd_cnt <= (rd_cnt_nxt + 1'b1);
 			r_sst_ce <= 0;
