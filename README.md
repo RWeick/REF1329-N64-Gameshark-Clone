@@ -3,7 +3,7 @@ This implements the original LZ9FC17 GAL on an Altera EPM240. It fully supports 
 
 The upper EEPROM contains the high bytes of the BIN, and the lower EEPROM contains the low bytes of the BIN. The 2x5 10 pin connector is mapped to the standard Altera USB Blaster pinout for programming. Happy making.
 
-If you'd like to program the EEPROMs using a Sanni Cart Reader, I've included separate Verilog that will temporarily make the Gameshark compatible with that. You will need to program the device with the Verilog mean for the N64 prior to using it with one.
+If you'd like to program the EEPROMs using a Sanni Cart Reader, I've included separate Verilog that will temporarily make the Gameshark compatible with that. You will need to program the device with the Verilog meant for the N64 prior to using it with one.
 
 This is my first foray into Verilog, and I welcome any comments or suggestions about how I could have done it better.
 
