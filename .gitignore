@@ -1,0 +1,7 @@
+# Local KiCad files
+*-backups/
+fp-info-cache
+*.kicad_prl
+
+# Photoshop documents
+*.psd
