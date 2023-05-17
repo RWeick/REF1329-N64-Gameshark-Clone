@@ -13,4 +13,4 @@ Huge shoutout to the [N64Brew](https://n64brew.dev/wiki/Main_Page) community, wh
 
 PCB Thickness: 1.2 mm
 
-![image](https://github.com/Modman/REF1329-N64-Gameshark-Clone/blob/main/Front.png)
+![image](Front.png)
