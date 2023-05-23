@@ -13,4 +13,4 @@ Huge shoutout to the [N64Brew](https://n64brew.dev/wiki/Main_Page) community, wh
 
 PCB Thickness: 1.2 mm
 
-![Front side of the PCB](Front.png)
+![Front side of the PCB](Altera_PR.png)
