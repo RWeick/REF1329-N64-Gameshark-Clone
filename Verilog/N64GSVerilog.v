@@ -152,13 +152,11 @@ begin
 		begin
 		r_sst [18:0] <= sst_address [18:0];
 		r_read_top <= 1;
-//		r_sst_oe <= (read_stat [5:3] == 3'b000) ? 1'b0 : 1'b1;
-//		r_sst_ce <= ((write_stat [5:3] == 3'b000) || (read_stat [5:3] == 3'b000)) ? 1'b0 : 1'b1;
 		r_sst_oe <= !read ? 1'b0 : 1'b1;
 		r_sst_ce <= (!write || !read) ? 1'b0 : 1'b1;
 		end
 		
-	if ((n64_ad_store == 32'h10400400) && (n64_data_store == 16'h001E))		//This register was a good candidate to disable "first boot" address mapping, enabling game boot after the firmware is loaded. It may actually exist for some other reason, but it causes no issues to be implemented like this.
+	if ((n64_ad_store == 32'h1E400600) && (n64_data_store == 16'h0012))		//This register was a good candidate to disable "first boot" address mapping, enabling game boot after the firmware is loaded. It may actually exist for some other reason, but it causes no issues to be implemented like this.
 		begin
 		first_boot <= 0;
 		end
