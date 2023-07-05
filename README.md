@@ -11,6 +11,8 @@ Huge shoutout to @Parasyte for his ceaseless guidance, mentorship, and encourage
 
 Huge shoutout to the [N64Brew](https://n64brew.dev/wiki/Main_Page) community, who have provided countless resources and documentation that enabled me to complete this project.
 
+[Here's a video of it in action.](https://youtu.be/faCqaDdL_ds)
+
 PCB Thickness: 1.2 mm
 
 ![Front side of the PCB](Altera_PR.png)
