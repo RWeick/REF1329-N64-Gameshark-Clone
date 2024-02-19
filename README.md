@@ -1,7 +1,7 @@
 # REF1329-N64-Gameshark-Pro-Clone
 This implements the original LZ9FC17 GAL on an Altera EPM240. It fully supports all functionality to include: parallel port, 7 segment display, and the GS button.
 
-The LZ9FC17 GAL is the same for both the N64 Gameshark and the N64 Gameshark Pro. All firmwares work with this clone.
+The LZ9FC17 GAL is the same for both the N64 Gameshark and the N64 Gameshark Pro. All firmwares work with this clone. The 7 Segment Display is connected differently on the original Gameshark PCB, so older Gameshark firmwares won't use it correctly on this hardware which is based on the Gameshark Pro PCB.
 
 The upper EEPROM contains the high bytes of the BIN, and the lower EEPROM contains the low bytes of the BIN. The 2x5 10 pin connector is mapped to the standard Altera USB Blaster pinout for programming. Happy making.
 
