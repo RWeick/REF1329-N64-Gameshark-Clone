@@ -41,7 +41,7 @@ reg one_op_en = 0;
 reg press = 0;
 reg [15:0] r_ad;
 reg [19:0] r_button = 20'hFFFFF;
-reg [2:0] r_cold_r = 3'b111;
+//reg [2:0] r_cold_r = 3'b111;
 reg r_cp = 0;
 reg r_dsab = 0;
 reg r_pport_cp;
@@ -76,7 +76,7 @@ begin
 	one_op_en <= 0;
 	press <= 0;
 	r_button [19:0] <= {r_button [18:0], button};
-	r_cold_r [2:0] <= {r_cold_r [1:0], cold_reset};
+//	r_cold_r [2:0] <= {r_cold_r [1:0], cold_reset};
 	r_rdr <= remote_data_ready;
 	r_read_top <= read;
 	r_sst_ce <= 1;
@@ -89,11 +89,11 @@ begin
 	write_low <= !write && !r_write;
 	write_stat [2:0] <= {write_stat [1:0], write};
 	
-	if (r_cold_r [2:0] == 3'b0)
-		begin
-		data_state <= STATE_0;
-		one_low_state <= STATE_2;
-		end
+//	if (r_cold_r [2:0] == 3'b0)
+//		begin
+//		data_state <= STATE_0;
+//		one_low_state <= STATE_2;
+//		end
 		
 	if (alel && !aleh)		//This reliably grabs the lower half of the address from the PI bus
 		begin
