@@ -12,6 +12,8 @@ Unlocking that address range was necessary to add support for the SST 28LF040's 
 
 Update (09May24): The clone is now fully compatible with the Nintendo 64 and the Sanni Cart Reader. It no longer needs to be reprogrammed to facilitate compatibility with each device separately.
 
+Update (11May24): The clone now fully supports all official Datel N64 Gameshark and Action Replay firmwares as well as the EMS Action Replay firmware (available in this repository).
+
 Huge shoutout to @Parasyte for his ceaseless guidance, mentorship, and encouragement, as well as for originally documenting the hardware registers of the N64 Gameshark. This would not exist without him.
 
 Huge shoutout to the [N64Brew](https://n64brew.dev/wiki/Main_Page) community, who have provided countless resources and documentation that enabled me to complete this project.
