@@ -25,24 +25,23 @@ output [18:0] sst;
 output sst_ce;
 output sst_oe;
 
-localparam STATE_0 = 3'd0, STATE_1 = 3'd1, STATE_2 = 3'd2;
-localparam STATE_3 = 3'd0, STATE_4 = 3'd1, STATE_5 = 3'd0, STATE_6 = 3'd1;
+localparam DATA_START = 3'd0, DATA_END = 3'd1, ONE_LOW_START = 3'd0, ONE_LOW_END = 3'd1, ONE_LOW_RESET = 3'd2, DATA_OUT_START = 3'd0, DATA_OUT_END = 3'd1;
 
-reg eleven_range_en = 1'b0;
-reg [15:0] data1 = 16'd0;
-reg [15:0] data2 = 16'd0;
-reg test_op_en = 0;
-reg test_low_op = 0;
-reg [2:0] test_state = STATE_5;
 reg ad_out_en = 0;
 reg [12:0] addr_increment = 13'b0;
 reg ale_out_en = 0;
-reg [2:0] data_state = STATE_0;
+reg [15:0] data1 = 16'd0;
+reg [15:0] data2 = 16'd0;
+reg data_out_en = 0;
+reg data_out_op = 0;
+reg [2:0] data_out_state = DATA_OUT_START;
+reg [2:0] data_state = DATA_START;
+reg eleven_range_en = 1'b0;
 reg first_boot = 1;
-reg [2:0] one_low_state = STATE_3;
-reg one_op_complete = 1'b0;
 reg [31:0] n64_ad_store = 32'b0;
 reg [15:0] n64_data_store = 16'b0;
+reg [2:0] one_low_state = ONE_LOW_END;
+reg one_op_complete = 1'b0;
 reg one_op_en = 0;
 reg press = 0;
 reg [15:0] r_ad;
@@ -76,8 +75,8 @@ assign sst_oe = r_sst_oe;
 
 always @(posedge clk)
 begin
-	test_op_en <= 0;
 	ad_out_en <= 0;
+	data_out_en <= 0;
 	one_op_complete <= 0;
 	one_op_en <= 0;
 	press <= 0;
@@ -106,86 +105,86 @@ begin
 		one_op_complete <= 1'b1;
 		end
 	
-	if (data_state == STATE_0)
+	if (data_state == DATA_START)
 		begin
 		if (read_low)
 			begin
 			sst_address [18:0] <= (n64_ad_store [19:1] + addr_increment);
 			ale_out_en <= 1;
-			data_state <= STATE_1;
+			data_state <= DATA_END;
 			end
 		
 		if (write_low)
 			begin
 			n64_data_store [15:0] <= ad;
 			sst_address [18:0] <= (n64_ad_store [19:1] + addr_increment);
-			data_state <= STATE_1;
+			data_state <= DATA_END;
 			end
 		end
 	
-	if (data_state == STATE_1)
+	if (data_state == DATA_END)
 		begin
 		if (read_high && write_high)
 			begin
 			addr_increment <= (addr_increment + 1'b1);
 			ale_out_en <= 0;
-			data_state <= STATE_0;
+			data_state <= DATA_START;
 			end
 		end
 		
-	if (one_low_state == STATE_2)
+	if (one_low_state == ONE_LOW_START)
 		begin
 		if ((read_low || write_low) && one_op_en)
 			begin
 			r_sst_ce <= (write_low || read_low) ? 1'b0 : 1'b1;
-			one_low_state <= STATE_3;
+			one_low_state <= ONE_LOW_END;
 			end
 		end
 			
-	if (one_low_state == STATE_3)
+	if (one_low_state == ONE_LOW_END)
 		begin
 		r_sst_ce <= (write_low || read_low) ? 1'b0 : 1'b1;
 		if (read_high && write_high)
 			begin
-			one_low_state <= STATE_4;
+			one_low_state <= ONE_LOW_RESET;
 			end
 		end
 	
-	if (one_low_state == STATE_4)
+	if (one_low_state == ONE_LOW_RESET)
 		begin
 		if (one_op_complete == 1'b1)
 			begin
-			one_low_state <= STATE_2;
+			one_low_state <= ONE_LOW_START;
 			end
 		end
 		
-	if (test_state == STATE_5)
+	if (data_out_state == DATA_OUT_START)
 		begin
-		if ((read_low) && test_op_en)
+		if ((read_low) && data_out_en)
 			begin
-			test_low_op <= 1;
+			data_out_op <= 1;
 			ad_out_en <= 1;
 			r_ad <= data1;
 			end
-		if ((read_high) && test_low_op)
+		if ((read_high) && data_out_op)
 			begin
-			test_state <= STATE_6;
-			test_low_op <= 0;
+			data_out_state <= DATA_OUT_END;
+			data_out_op <= 0;
 			end
 		end
 	
-	if (test_state == STATE_6)
+	if (data_out_state == DATA_OUT_END)
 		begin
-		if ((read_low) && test_op_en)
+		if ((read_low) && data_out_en)
 			begin
-			test_low_op <= 1;
+			data_out_op <= 1;
 			ad_out_en <= 1;
 			r_ad <= data2;
 			end
-		if ((read_high) && test_low_op)
+		if ((read_high) && data_out_op)
 			begin
-			test_state <= STATE_5;
-			test_low_op <= 0;
+			data_out_state <= DATA_OUT_START;
+			data_out_op <= 0;
 			end
 		end
 		
@@ -219,7 +218,7 @@ begin
 		
 	if ((n64_ad_store == 32'h10300261) && first_boot)
 		begin
-		test_op_en <= 1;
+		data_out_en <= 1;
 		data1 <= 16'h5445;
 		data2 <= 16'h0;
 		r_read_top <= 1;
@@ -254,7 +253,7 @@ begin
 	
 	if ((n64_ad_store == 32'h11300220) && eleven_range_en)
 		begin
-		test_op_en <= 1;
+		data_out_en <= 1;
 		data1 <= 16'h4441;
 		data2 <= 16'h0;
 		r_read_top <= 1;
