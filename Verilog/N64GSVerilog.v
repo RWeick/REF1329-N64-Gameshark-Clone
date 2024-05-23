@@ -37,9 +37,10 @@ reg data_out_op = 0;
 reg [2:0] data_out_state = DATA_OUT_START;
 reg [2:0] data_state = DATA_START;
 reg eleven_range_en = 1'b0;
-reg first_boot = 1;
+reg first_boot = 1'b1;
 reg [31:0] n64_ad_store = 32'b0;
 reg [15:0] n64_data_store = 16'b0;
+reg one_e_range_en = 1'b0;
 reg [2:0] one_low_state = ONE_LOW_END;
 reg one_op_complete = 1'b0;
 reg one_op_en = 0;
@@ -222,7 +223,21 @@ begin
 		data1 <= 16'h5445;
 		data2 <= 16'h0;
 		r_read_top <= 1;
-		end	
+		end
+		
+	if (n64_ad_store == 32'h10400400)
+		begin
+		if (n64_data_store == 16'h11)
+			begin
+			first_boot <= 1'b0;
+			eleven_range_en <= 1'b1;
+			end
+		if (n64_data_store == 16'h1E)
+			begin
+			first_boot <= 1'b0;
+			one_e_range_en <= 1'b1;
+			end
+		end
 
 	if ((n64_ad_store [31:20] == 12'h10C) && first_boot)
 		begin
@@ -281,12 +296,6 @@ begin
 		r_read_top <= 1;
 		end
 		
-	if ((n64_ad_store == 32'h05000508) || (n64_ad_store == 32'h1FF00000))
-		begin
-		first_boot <= 0;
-		eleven_range_en <= 1'b1;
-		end
-		
 	if ((n64_ad_store [31:20] == 12'h11C) && eleven_range_en)
 		begin
 		r_sst [18:0] <= sst_address [18:0];
@@ -311,7 +320,7 @@ begin
 		one_op_en <= 1;
 		end
 
-	if (n64_ad_store == 32'h1E400000)
+	if ((n64_ad_store == 32'h1E400000) && one_e_range_en)
 		begin
 		r_ad [0] <= remote_d0;
 		r_ad [1] <= remote_d1;
@@ -327,24 +336,24 @@ begin
 		r_read_top <= 1;
 		end
 
-	if ((n64_ad_store == 32'h1E400600) && n64_data_store [9])
+	if (((n64_ad_store == 32'h1E400600) && n64_data_store [9]) && one_e_range_en)
 		begin
 		seven_seg_enable <= n64_data_store [10];
 		first_boot <= 0;
 		end
 
-	if ((n64_ad_store == 32'h1E400800) && seven_seg_enable)
+	if (((n64_ad_store == 32'h1E400800) && seven_seg_enable)&& one_e_range_en)
 		begin
 		r_dsab <= n64_data_store [9];
 		r_cp <= n64_data_store [10];
 		end
 
-	if (n64_ad_store == 32'h1E5FFFFC) 
+	if ((n64_ad_store == 32'h1E5FFFFC) && one_e_range_en)
 		begin
 		r_pport_cp <= !write_low;
 		end
 
-	if (n64_ad_store [31:20] == 12'h1EC)
+	if ((n64_ad_store [31:20] == 12'h1EC) && one_e_range_en)
 		begin
 		r_sst [18:0] <= sst_address [18:0];
 		r_read_top <= 1;
@@ -352,7 +361,7 @@ begin
 		r_sst_ce <= ((write_stat [2:0] == 0) || read_low) ? 1'b0 : 1'b1;
 		end
 
-	if (n64_ad_store [31:20] == (12'h1EE))
+	if ((n64_ad_store [31:20] == 12'h1EE) && one_e_range_en)
 		begin
 		r_read_top <= 1;
 		r_sst [18:0] <= (n64_ad_store [19:1]);
@@ -360,7 +369,7 @@ begin
 		one_op_en <= 1;
 		end
 
-	if (n64_ad_store [31:20] == (12'h1EF))
+	if ((n64_ad_store [31:20] == 12'h1EF) && one_e_range_en)
 		begin
 		r_sst [18:0] <= ((n64_ad_store [19:1]) + 1'b1);
 		r_read_top <= 1;
