@@ -58,7 +58,7 @@ reg r_sst_oe = 1;
 reg r_read = 1;
 reg read_high;
 reg read_low;
-reg seven_seg_enable = 0;
+reg seven_seg_enable = 1'b0;
 reg [18:0] sst_address = 0;
 reg r_write = 1;
 reg write_high;
@@ -296,6 +296,17 @@ begin
 		r_read_top <= 1;
 		end
 		
+	if ((n64_ad_store == 32'h11400600) && n64_data_store [9] && eleven_range_en)
+		begin
+		seven_seg_enable <= n64_data_store [10];
+		end
+
+	if ((n64_ad_store == 32'h11400800) && seven_seg_enable && eleven_range_en)
+		begin
+		r_dsab <= n64_data_store [8];
+		r_cp <= n64_data_store [9];
+		end
+		
 	if ((n64_ad_store [31:20] == 12'h11C) && eleven_range_en)
 		begin
 		r_sst [18:0] <= sst_address [18:0];
@@ -342,7 +353,7 @@ begin
 		first_boot <= 0;
 		end
 
-	if (((n64_ad_store == 32'h1E400800) && seven_seg_enable)&& one_e_range_en)
+	if (((n64_ad_store == 32'h1E400800) && seven_seg_enable) && one_e_range_en)
 		begin
 		r_dsab <= n64_data_store [9];
 		r_cp <= n64_data_store [10];
