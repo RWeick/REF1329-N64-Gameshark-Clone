@@ -3,16 +3,11 @@ This is a fully functional Nintendo 64 GameShark clone. It implements the origin
 
 The LZ9FC17 GAL is the same for both the N64 Gameshark and the N64 Gameshark Pro. All firmwares work with this clone. The 7 Segment Display is connected differently on the original Gameshark PCB, so older Gameshark firmwares won't use it correctly on this hardware which is based on the Gameshark Pro PCB.
 
+This is compatible with the Sanni Cartridge Reader's N64 Gameshark programming function as well as the EMS hacked firmware that was released for the first ever Gameshark / Action Replay clone.
+
 The upper EEPROM contains the high bytes of the BIN, and the lower EEPROM contains the low bytes of the BIN. The 2x5 10 pin connector is mapped to the standard Altera USB Blaster pinout for programming. Happy making.
 
-This is my first foray into Verilog, and I welcome any comments or suggestions about how I could have done it better.
-
-Update (07Sep23): I've discovered that a write of 1E1E to 0x10400400 enables use of the 0x1EE, 0x1EF, and 0x1EC address ranges. These are disabled at first boot. I may add that to my clone chip for completeness' sake, but it's not required.
-Unlocking that address range was necessary to add support for the SST 28LF040's to the Sanni Cart Reader, which I've now done. It isn't possible to send the unprotect and protect commands for the eeproms without doing that.
-
-Update (09May24): The clone is now fully compatible with the Nintendo 64 and the Sanni Cart Reader. It no longer needs to be reprogrammed to facilitate compatibility with each device separately.
-
-Update (11May24): The clone now fully supports all official Datel N64 Gameshark and Action Replay firmwares as well as the EMS Action Replay firmware (available in this repository).
+The command address to enable higher address ranges is 0x1040_0400. A write to this address of 0x11 will enable all custom used address ranges beginning with 0x11xx_xxxx. A write to this address of 0x1E will enable all custom used address ranges beginning with 0x1Exx_xxxx.
 
 Huge shoutout to @Parasyte for his ceaseless guidance, mentorship, and encouragement, as well as for originally documenting the hardware registers of the N64 Gameshark. This would not exist without him.
 
