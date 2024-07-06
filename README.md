@@ -11,6 +11,8 @@ Huge shoutout to @Parasyte for his ceaseless guidance, mentorship, and encourage
 
 Huge shoutout to the [N64Brew](https://n64brew.dev/wiki/Main_Page) community, who have provided countless resources and documentation that enabled me to complete this project.
 
+The Various Gameshark Firmwares directory contains every known firmware in existence. All US firmwares have been collected and preserved there as well as all of the versions I can find from other countries. Please contribure if you have something I do not! It was no small task to collect the U.S. firmwares as some of those are incredibly rare to find today.
+
 [Here's a video of it in action.](https://youtu.be/faCqaDdL_ds)
 
 PCB Thickness: 1.2 mm
