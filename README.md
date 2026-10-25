@@ -11,6 +11,8 @@ Huge shoutout to @Parasyte for his ceaseless guidance, mentorship, and encourage
 
 Huge shoutout to the [N64Brew](https://n64brew.dev/wiki/Main_Page) community, who have provided countless resources and documentation that enabled me to complete this project.
 
+Huge shoutout to @Jhynjhiruu for determining that my original reconstruction wasn't perfectly faithful to the original chip. With his discoveries, the logic here is now complete.
+
 The Various Gameshark Firmwares directory contains every known firmware in existence. All US firmwares have been collected and preserved there as well as all of the versions I can find from other countries. Please contribute if you have something I do not! It was no small task to collect the U.S. firmwares as some of those are incredibly rare to find today.
 
 [Here's a video of it in action.](https://youtu.be/faCqaDdL_ds)
