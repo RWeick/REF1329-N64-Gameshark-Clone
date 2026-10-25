@@ -21,5 +21,5 @@ The Various Gameshark Firmwares directory contains every known firmware in exist
 
 PCB Thickness: 1.2 mm
 
-![Front side of the PCB](Altera_PR.png)
+![Front side of the PCB](Altera_EPM240.png)
 
